@@ -1,0 +1,45 @@
+name: Run GPU Notebook
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  run-notebook:
+    # Use 'ubuntu-latest' if using GitHub-hosted GPU runners (Beta)
+    # Or use 'self-hosted' if you connected your own GPU instance
+    runs-on: ubuntu-latest 
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-xversion: '3.10' # Matches standard Colab runtimes
+        cache: 'pip'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install papermill ipykernel
+        python -m ipykernel install --user --name=python3
+
+    - name: Verify GPU Availability
+      run: |
+        nvidia-smi
+        python -c "import torch; print('CUDA Available:', torch.cuda.is_available())"
+
+    - name: Execute Notebook
+      run: |
+        papermill DA25M600_FLD_v2.ipynb output_DA25M600_FLD_v2.ipynb
+
+    - name: Upload Output Notebook
+      uses: actions/upload-artifact@v4
+      if: always() # Ensures logs upload even if execution fails
+      with:
+        name: notebook-results
+        path: output_notebook.ipynb
