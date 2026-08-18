@@ -1,0 +1,13 @@
+imutils
+matplotlib
+mlflow
+numpy
+opencv-python
+pandas
+pillow
+prometheus-client
+pyspark
+requests
+scikit-image
+torch
+torchvision
